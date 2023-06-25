@@ -11,7 +11,7 @@ yields:
 
 ```
 class MyClass {
-  var numbers: AsyncStream<Int> {
+  public var numbers: AsyncStream<Int> {
     _numbers
   }
 
