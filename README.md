@@ -2,7 +2,7 @@
 
 This is a macro (which can definitely be improved) where the usage is:
 ```
-@CreateAsyncStream(of: Int, named: "numbers")
+@CreateAsyncStream(of: Int.self, named: "numbers")
 class MyClass {
 }
 ```
@@ -15,7 +15,7 @@ class MyClass {
     _numbers
   }
 
-  private let (_numbers, _numbersContinuation) = AsyncStream.makeStream(of: Int.self)
+  private let (_numbers, numbersContinuation) = AsyncStream.makeStream(of: Int.self)
 }
 ```
 I'd love suggestions on how to make this better
