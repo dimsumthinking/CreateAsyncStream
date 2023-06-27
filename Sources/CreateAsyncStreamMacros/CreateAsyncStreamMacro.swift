@@ -9,11 +9,11 @@ import Foundation
 /// This macro adds a public async stream of a given type and a private continuation
 ///  to a class
 ///
-///     `@CreateAsyncStream(of: Int, named: "numbers")`
+///     `@CreateAsyncStream(of: Int.self, named: "numbers")`
 ///
 /// adds the following members to the class:
 /// `public var numbers: AsyncStream<Int> { _numbers }
-/// `private let (_numbers, _numbersContinuation)`
+/// `private let (_numbers, numbersContinuation)`
 /// `   = AsyncStream.makeStream(of: Int.self)`
 ///
 ///
@@ -28,16 +28,18 @@ public struct CreateAsyncStreamMacro: MemberMacro {
       fatalError("who knows what happened")
     }
     let type = typeArgument.description
-      .replacingOccurrences(of: "of: ", with: "")
-      .replacingOccurrences(of: ", ", with: "")
+      .replacingOccurrences(of: "of:", with: "")
+      .replacingOccurrences(of: ",", with: "")
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+    let t = type.replacingOccurrences(of: ".self", with: "")
     let name = nameArgument.description
       .replacingOccurrences(of: "named:", with: "")
       .replacingOccurrences(of: "\"", with: "")
       .trimmingCharacters(in: .whitespacesAndNewlines)
 
     return [
-      "public var \(raw: name): AsyncStream<\(raw: type)> { _\(raw: name)}",
-      "private let (_\(raw: name), _\(raw: name)Continuation) = AsyncStream.makeStream(of: \(raw: type).self)"
+      "public var \(raw: name): AsyncStream<\(raw: t)> { _\(raw: name)}",
+      "private let (_\(raw: name), \(raw: name)Continuation) = AsyncStream.makeStream(of: \(raw: type))"
     ]
   }
   

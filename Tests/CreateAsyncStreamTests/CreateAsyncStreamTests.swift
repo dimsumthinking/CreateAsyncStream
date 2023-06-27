@@ -11,12 +11,11 @@ final class CreateAsyncStreamTests: XCTestCase {
     func testMacro() {
         assertMacroExpansion(
             """
-            @CreateAsyncStream(of: Int, named: "numbers")
+            @CreateAsyncStream(of: Int.self, named: "numbers")
             """,
             expandedSource: """
             public var numbers: AsyncStream<Int> { _numbers }
-            private let (_numbers, _numbersContinuation)
-               = AsyncStream.makeStream(of: Int.self)
+            private let (_numbers, numbersContinuation) = AsyncStream.makeStream(of: Int.self)
             """,
             macros: testMacros
         )
