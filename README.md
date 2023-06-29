@@ -1,6 +1,6 @@
 # CreateAsyncStream
 
-This is a macro (which can definitely be improved) where the usage is:
+This is a macro where the usage is:
 ```
 @CreateAsyncStream(of: Int.self, named: "numbers")
 class MyClass {
@@ -18,4 +18,4 @@ class MyClass {
   private let (_numbers, numbersContinuation) = AsyncStream.makeStream(of: Int.self)
 }
 ```
-I'd love suggestions on how to make this better
+I'd love suggestions on how to make this better - based on suggestions from @Ole and @GeekAndDad I've replaced the string parsing with SwiftSyntax based calls. 
