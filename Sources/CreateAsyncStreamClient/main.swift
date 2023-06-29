@@ -1,9 +1,8 @@
 import CreateAsyncStream
 
-@CreateAsyncStream(of: Int.self, named: "number")
+@CreateAsyncStream(of: Int.self, named: "numbers")
 class Example {
-  init() {}
   func something() {
-    numberContinuation.yield(6)
+    numbersContinuation.yield(6)
   }
 }
