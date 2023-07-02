@@ -4,8 +4,8 @@ import XCTest
 import CreateAsyncStreamMacros
 
 final class CreateAsyncStreamTests: XCTestCase {
-    func testMacro() {
-        assertMacroExpansion(
+  func testMacro() {
+    assertMacroExpansion(
             """
             @CreateAsyncStream(of: Int.self, named: "numbers")
             class MyClass {
@@ -20,6 +20,6 @@ final class CreateAsyncStreamTests: XCTestCase {
             }
             """,
             macros: ["CreateAsyncStream": CreateAsyncStreamMacro.self]
-        )
-    }
+    )
+  }
 }

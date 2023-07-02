@@ -6,10 +6,10 @@ import SwiftSyntaxMacros
 import Foundation
 
 
-/// This macro adds a public async stream of a given type and a private continuation
-///  to a class
+/// This macro adds a public async stream of a given type and a
+/// private continuation to a class, struct, or actor
 ///
-///     `@CreateAsyncStream(of: Int.self, named: "numbers")`
+/// `@CreateAsyncStream(of: Int.self, named: "numbers")`
 ///
 /// adds the following members to the class:
 /// `public var numbers: AsyncStream<Int> { _numbers }
@@ -21,6 +21,7 @@ public struct CreateAsyncStreamMacro: MemberMacro {
   public static func expansion(of node: AttributeSyntax,
                                providingMembersOf declaration: some DeclGroupSyntax,
                                in context: some MacroExpansionContext) throws -> [DeclSyntax] {
+    try Self.validateContext(declaration)
     let arguments = try Self.arguments(from: node)
     let type = try Self.type(from: arguments[0])
     let name = try Self.name(from: arguments[1])
@@ -32,12 +33,25 @@ public struct CreateAsyncStreamMacro: MemberMacro {
 }
 
 extension CreateAsyncStreamMacro {
+  static private func validateContext(_ context: some DeclGroupSyntax) throws {
+    guard context.is(ClassDeclSyntax.self)
+            || context.is(StructDeclSyntax.self)
+            || context.is(ActorDeclSyntax.self) else {
+      throw CreateAsyncStreamError.mustBeAppliedToClassStructOrActor
+    }
+  }
+}
+
+extension CreateAsyncStreamMacro {
   static private func arguments(from node: AttributeSyntax) throws -> [TupleExprElementSyntax] {
-    guard let arguments = Syntax(node.argument)?
-      .children(viewMode: .sourceAccurate)
-      .compactMap({$0.as(TupleExprElementSyntax.self)}),
-    arguments.count == 2 else {
-      fatalError("The macro should take two arguments")
+    guard case .argumentList(let argumentList) = node.argument else {
+      throw CreateAsyncStreamError.mustHaveTwoArguments(numberOfArguments: 0)
+    }
+    let arguments
+            = argumentList.children(viewMode: .sourceAccurate)
+      .compactMap({$0.as(TupleExprElementSyntax.self)})
+    guard arguments.count == 2 else {
+      throw CreateAsyncStreamError.mustHaveTwoArguments(numberOfArguments: arguments.count)
     }
     return arguments
   }
@@ -48,8 +62,9 @@ extension CreateAsyncStreamMacro {
     guard let type = attribute
       .expression
       .as(MemberAccessExprSyntax.self)?
-      .base else {
-      fatalError("The first argument should be a type")
+      .base,
+      attribute.label?.text == "of" else {
+      throw CreateAsyncStreamError.incorrectFirstArgument
     }
     return type
   }
@@ -60,8 +75,10 @@ extension CreateAsyncStreamMacro {
     guard let name = attribute
       .expression
       .as(StringLiteralExprSyntax.self)?
-      .representedLiteralValue else {
-      fatalError("The second argument should be a String")
+      .representedLiteralValue,
+          attribute.label?.text == "named"
+    else {
+      throw CreateAsyncStreamError.incorrectSecondArgument
     }
     return name
   }
